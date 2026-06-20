@@ -1637,50 +1637,50 @@ async function fetchStaffList() {
     }
 }
 
-function openPageAccessModal(id, email, allowedPagesStr) {
-    const accessBox = document.getElementById('box-page-access');
-    if (!accessBox) return;
+// function openPageAccessModal(id, email, allowedPagesStr) {
+//     const accessBox = document.getElementById('box-page-access');
+//     if (!accessBox) return;
 
-    accessBox.style.display = 'block'; 
-    accessBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+//     accessBox.style.display = 'block'; 
+//     accessBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    document.getElementById('access-staff-email').innerText = email;
-    document.getElementById('access-staff-id').value = id;
+//     document.getElementById('access-staff-email').innerText = email;
+//     document.getElementById('access-staff-id').value = id;
     
-    let allowedPages = [];
-    try { allowedPages = JSON.parse(decodeURIComponent(allowedPagesStr)); } catch(e){}
+//     let allowedPages = [];
+//     try { allowedPages = JSON.parse(decodeURIComponent(allowedPagesStr)); } catch(e){}
     
-    document.querySelectorAll('.page-checkbox').forEach(cb => {
-        cb.checked = allowedPages.includes(cb.value);
-    });
-}
+//     document.querySelectorAll('.page-checkbox').forEach(cb => {
+//         cb.checked = allowedPages.includes(cb.value);
+//     });
+// }
 
-function closePageAccessBox() { 
-    document.getElementById('box-page-access').style.display = 'none'; 
-}
+// function closePageAccessBox() { 
+//     document.getElementById('box-page-access').style.display = 'none'; 
+// }
 
-async function savePageAccess() {
-    const id = document.getElementById('access-staff-id').value;
-    const checkboxes = document.querySelectorAll('.page-checkbox:checked');
-    const allowedPages = Array.from(checkboxes).map(cb => cb.value);
+// async function savePageAccess() {
+//     const id = document.getElementById('access-staff-id').value;
+//     const checkboxes = document.querySelectorAll('.page-checkbox:checked');
+//     const allowedPages = Array.from(checkboxes).map(cb => cb.value);
     
-    const btn = document.getElementById('btn-save-access');
-    btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Saving..."; 
-    btn.disabled = true;
+//     const btn = document.getElementById('btn-save-access');
+//     btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Saving..."; 
+//     btn.disabled = true;
     
-    try {
-        const { error } = await _supabase.from('user_roles').update({ allowed_pages: allowedPages }).eq('id', id);
-        if (error) throw error;
-        alert("✅ စာမျက်နှာ ဝင်ခွင့်ကို အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။");
-        closePageAccessBox();
-        fetchStaffList(); 
-    } catch(e) {
-        alert("Error: " + e.message);
-    } finally {
-        btn.innerHTML = "💾 ဝင်ခွင့် သိမ်းဆည်းမည်"; 
-        btn.disabled = false;
-    }
-}
+//     try {
+//         const { error } = await _supabase.from('user_roles').update({ allowed_pages: allowedPages }).eq('id', id);
+//         if (error) throw error;
+//         alert("✅ စာမျက်နှာ ဝင်ခွင့်ကို အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီ။");
+//         closePageAccessBox();
+//         fetchStaffList(); 
+//     } catch(e) {
+//         alert("Error: " + e.message);
+//     } finally {
+//         btn.innerHTML = "💾 ဝင်ခွင့် သိမ်းဆည်းမည်"; 
+//         btn.disabled = false;
+//     }
+// }
 
 async function createNewStaff() {
     const name = document.getElementById('staff-name').value.trim();
