@@ -576,12 +576,12 @@ function closeVehicleActionModal() {
 // ============================================
 // 🌟 Modal ပြန်ပိတ်မည့် Function 
 // ============================================
-function closeVehicleActionModal() {
-    const modal = document.getElementById('vehicle-action-modal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
+// function closeVehicleActionModal() {
+//     const modal = document.getElementById('vehicle-action-modal');
+//     if (modal) {
+//         modal.style.display = 'none';
+//     }
+// }
 
 // ၂။ 🔄 ပိုင်ရှင်သစ်ထံ လွှဲပြောင်းခြင်း (Transfer)
 async function transferVehicle() {
