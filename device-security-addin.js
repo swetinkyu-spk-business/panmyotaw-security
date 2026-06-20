@@ -24,7 +24,7 @@ geotab.addin.deviceLock = function(api, state) {
             .from('profiles')
             .select('registered_device_id, registered_device_id_2, allowed_device_count')
             .eq('email', geotabUser)
-            .single();
+            .maybeSingle();
 
           if (error) {
               console.error("Supabase Error:", error);
