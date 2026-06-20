@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <title>Panmyotaw Security Lock</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://panmyotaw-security-pc74.vercel.app/config.js"></script>
 
-  <script src="https://panmyotaw-security-pc74.vercel.app/device-security-adding.js" type="module"></script>
-
   <script src="https://openfpcdn.io/fingerprintjs/v4" type="module"></script>
+
+  <script src="https://panmyotaw-security-pc74.vercel.app/device-security-addin.js"></script>
 
   <style>
     body { font-family: 'Pyidaungsu', sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; }
@@ -20,82 +20,5 @@
   <div id="security-status" class="status-box" style="color: #f39c12; border: 1px solid #f1c40f;">
     <span class="spinner" style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> လုံခြုံရေး စစ်ဆေးနေပါသည်...
   </div>
-
-  <script>    
-    geotab.addin.deviceLock = function(api, state) {
-      return {
-        initialize: function(api, state, callback) {
-          callback();
-        },
-        focus: async function(api, state) {
-          try {
-            api.getSession(async function(session) {
-              const geotabUser = session.userName;
-
-              const fp = await window.FingerprintJS.load();
-              const result = await fp.get();
-              const currentDeviceId = result.visitorId;
-
-              const statusDiv = document.getElementById('security-status');
-
-              // 🌟 Database မှ ID နှစ်ခုလုံး နှင့် ခွင့်ပြုထားသော အရေအတွက်ကို ဆွဲယူမည် 🌟
-              const { data, error } = await window._supabase
-                .from('profiles')
-                .select('registered_device_id, registered_device_id_2, allowed_device_count')
-                .eq('email', geotabUser)
-                .single();
-
-              let id1 = data ? data.registered_device_id : null;
-              let id2 = data ? data.registered_device_id_2 : null;
-              let limit = data && data.allowed_device_count ? data.allowed_device_count : 1;
-
-              // အခြေအနေ (က) - လက်ရှိစက်သည် ID 1 သို့မဟုတ် ID 2 တစ်ခုခုနှင့် ကိုက်ညီနေပါက ခွင့်ပြုမည်
-              if (currentDeviceId === id1 || currentDeviceId === id2) {
-                statusDiv.innerHTML = "✅ လုံခြုံရေး အတည်ပြုပြီးပါပြီ။ (Verified Device)";
-                statusDiv.style.color = "#155724";
-                statusDiv.style.background = "#d4edda";
-                statusDiv.style.borderColor = "#c3e6cb";
-
-              // အခြေအနေ (ခ) - ID 1 လွတ်နေသေးလျှင် ပထမစက်အဖြစ် မှတ်မည်
-              } else if (!id1) {
-                await window._supabase.from('profiles').update({ 
-                    registered_device_id: currentDeviceId 
-                }).eq('email', geotabUser);
-
-                statusDiv.innerHTML = "✅ ဤစက်ကို ပထမစက်အဖြစ် မှတ်ပုံတင်ပြီးပါပြီ။";
-                statusDiv.style.color = "#155724";
-                statusDiv.style.background = "#d4edda";
-
-              // အခြေအနေ (ဂ) - ID 1 ပြည့်နေပြီး၊ Limit က ၂ ခုရမည်ဖြစ်ကာ ID 2 လွတ်နေသေးလျှင် ဒုတိယစက်အဖြစ် မှတ်မည်
-              } else if (!id2 && limit > 1) {
-                await window._supabase.from('profiles').update({ 
-                    registered_device_id_2: currentDeviceId 
-                }).eq('email', geotabUser);
-
-                statusDiv.innerHTML = "✅ ဤစက်ကို ဒုတိယစက်အဖြစ် မှတ်ပုံတင်ပြီးပါပြီ။";
-                statusDiv.style.color = "#155724";
-                statusDiv.style.background = "#d4edda";
-
-              // အခြေအနေ (ဃ) - ခွင့်ပြုထားသော စက်အရေအတွက် ပြည့်သွားပြီး စက်မတူတော့ပါက (Auto Logout လုပ်မည်)
-              } else {
-                statusDiv.innerHTML = `⚠️ ဤအကောင့်သည် ခွင့်ပြုထားသော စက်အရေအတွက် (${limit} ခု) ပြည့်သွားပါပြီ။`;
-                statusDiv.style.color = "#721c24";
-                statusDiv.style.background = "#f8d7da";
-                statusDiv.style.borderColor = "#f5c6cb";
-                
-                alert(`⚠️ လုံခြုံရေးသတိပေးချက်: ဤအကောင့်သည် ခွင့်ပြုထားသော စက်အရေအတွက် ပြည့်သွားပါပြီ။ အခြားစက်မှ ဝင်ရောက်လိုပါက Admin ထံ ဆက်သွယ်ပါ။ သင့်အား စနစ်မှ ထွက်ပါမည်။`);
-                
-                api.forget(); 
-                window.location.reload();
-              }
-            });
-          } catch (e) {
-            console.error("Security Add-in Error:", e);
-          }
-        },
-        blur: function(api, state) {}
-      };
-    };
-  </script>
 </body>
 </html>
