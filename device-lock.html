@@ -1,0 +1,179 @@
+<?php
+// CORS Header များကို အတင်းအဓမ္မ ထည့်သွင်းခြင်း
+header("Access-Control-Allow-Origin: https://my.geotab.com");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// OPTIONS request ဝင်လာပါက ချက်ချင်း 200 OK ပြန်ပေးရန် (CORS Preflight အတွက်)
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Panmyotaw Security Lock</title>
+  
+  <script src="https://openfpcdn.io/fingerprintjs/v4"></script>
+  
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
+  <script src="config.js"></script>
+
+  <style>
+    body { font-family: 'Pyidaungsu', sans-serif; margin: 0; padding: 20px; background-color: #f4f6f9; }
+    .status-box { padding: 15px; text-align: center; border-radius: 8px; font-weight: bold; background: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+  </style>
+</head>
+<body>
+  <div id="security-status" class="status-box" style="color: #f39c12; border: 1px solid #f1c40f;">
+    <span class="spinner" style="display:inline-block; animation: spin 1s linear infinite;">⏳</span> လုံခြုံရေး စစ်ဆေးနေပါသည်...
+  </div>
+
+  <script>
+    // Geotab Add-in ၏ ပင်မလုပ်ဆောင်ချက်
+    // geotab.addin.deviceLock = function(api, state) {
+    //   return {
+    //     initialize: function(api, state, callback) {
+    //       callback();
+    //     },
+    //     focus: async function(api, state) {
+    //       try {
+    //         // ၁။ Geotab မှ လက်ရှိ ဝင်ထားသူ၏ အီးမေးလ်/Username ကို ယူမည်
+    //         api.getSession(async function(session) {
+    //           const geotabUser = session.userName;
+
+    //           // ၂။ ဖုန်း/စက်၏ သီးသန့် Device ID ကို ဖတ်မည်
+    //           const fp = await window.FingerprintJS.load();
+    //           const result = await fp.get();
+    //           const currentDeviceId = result.visitorId;
+
+    //           const statusDiv = document.getElementById('security-status');
+
+    //           // ၃။ config.js ထဲမှ window._supabase ကို အသုံးပြု၍ Database တွင် စစ်ဆေးမည်
+    //           // (မှတ်ချက် - သင့် Table တွင် 'email' သို့မဟုတ် 'username' ရှိသည့် Column နှင့် ညီအောင် ပြင်ပေးပါ)
+    //           const { data, error } = await window._supabase
+    //             .from('profiles')
+    //             .select('registered_device_id')
+    //             .eq('email', geotabUser) 
+    //             .single();
+
+    //           let registeredId = data ? data.registered_device_id : null;
+
+    //           if (!registeredId) {
+    //             // အခြေအနေ (က) - ပထမဆုံးအကြိမ် ဝင်ရောက်ခြင်း (Bind လုပ်မည်)
+    //             await window._supabase.from('profiles').update({ 
+    //                 registered_device_id: currentDeviceId 
+    //             }).eq('email', geotabUser);
+
+    //             statusDiv.innerHTML = "✅ ဤစက်ကို အောင်မြင်စွာ မှတ်ပုံတင်ပြီးပါပြီ။";
+    //             statusDiv.style.color = "#155724";
+    //             statusDiv.style.background = "#d4edda";
+    //             statusDiv.style.borderColor = "#c3e6cb";
+
+    //           } else if (registeredId === currentDeviceId) {
+    //             // အခြေအနေ (ခ) - စက်မှန်ကန်သည်
+    //             statusDiv.innerHTML = "✅ လုံခြုံရေး အတည်ပြုပြီးပါပြီ။ ခရီးစဉ်များ ဆက်လက်ကြည့်ရှုနိုင်ပါသည်။";
+    //             statusDiv.style.color = "#155724";
+    //             statusDiv.style.background = "#d4edda";
+    //             statusDiv.style.borderColor = "#c3e6cb";
+
+    //           } else {
+    //             // အခြေအနေ (ဂ) - အကောင့်ပွားသုံးခြင်း (စက်မတူပါ)
+    //             statusDiv.innerHTML = "⚠️ ဤအကောင့်သည် အခြားစက်တွင် မှတ်ပုံတင်ထားပါသည်။ စနစ်မှ ထွက်နေပါသည်...";
+    //             statusDiv.style.color = "#721c24";
+    //             statusDiv.style.background = "#f8d7da";
+    //             statusDiv.style.borderColor = "#f5c6cb";
+                
+    //             alert("⚠️ လုံခြုံရေးသတိပေးချက်: ဤအကောင့်သည် အခြားဖုန်းတစ်ခုတွင် Lock ချထားပြီး ဖြစ်ပါသည်။ သင့်အား စနစ်မှ အလိုအလျောက် ထွက်ပါမည်။");
+                
+    //             // Geotab မှ အတင်း Logout ချပစ်ခြင်း
+    //             api.forget(); 
+    //             window.location.reload();
+    //           }
+    //         });
+    //       } catch (e) {
+    //         console.error("Security Add-in Error:", e);
+    //       }
+    //     },
+    //     blur: function(api, state) {}
+    //   };
+    // };
+    geotab.addin.deviceLock = function(api, state) {
+      return {
+        initialize: function(api, state, callback) {
+          callback();
+        },
+        focus: async function(api, state) {
+          try {
+            api.getSession(async function(session) {
+              const geotabUser = session.userName;
+
+              const fp = await window.FingerprintJS.load();
+              const result = await fp.get();
+              const currentDeviceId = result.visitorId;
+
+              const statusDiv = document.getElementById('security-status');
+
+              // 🌟 Database မှ ID နှစ်ခုလုံး နှင့် ခွင့်ပြုထားသော အရေအတွက်ကို ဆွဲယူမည် 🌟
+              const { data, error } = await window._supabase
+                .from('profiles')
+                .select('registered_device_id, registered_device_id_2, allowed_device_count')
+                .eq('email', geotabUser)
+                .single();
+
+              let id1 = data ? data.registered_device_id : null;
+              let id2 = data ? data.registered_device_id_2 : null;
+              let limit = data && data.allowed_device_count ? data.allowed_device_count : 1;
+
+              // အခြေအနေ (က) - လက်ရှိစက်သည် ID 1 သို့မဟုတ် ID 2 တစ်ခုခုနှင့် ကိုက်ညီနေပါက ခွင့်ပြုမည်
+              if (currentDeviceId === id1 || currentDeviceId === id2) {
+                statusDiv.innerHTML = "✅ လုံခြုံရေး အတည်ပြုပြီးပါပြီ။ (Verified Device)";
+                statusDiv.style.color = "#155724";
+                statusDiv.style.background = "#d4edda";
+                statusDiv.style.borderColor = "#c3e6cb";
+
+              // အခြေအနေ (ခ) - ID 1 လွတ်နေသေးလျှင် ပထမစက်အဖြစ် မှတ်မည်
+              } else if (!id1) {
+                await window._supabase.from('profiles').update({ 
+                    registered_device_id: currentDeviceId 
+                }).eq('email', geotabUser);
+
+                statusDiv.innerHTML = "✅ ဤစက်ကို ပထမစက်အဖြစ် မှတ်ပုံတင်ပြီးပါပြီ။";
+                statusDiv.style.color = "#155724";
+                statusDiv.style.background = "#d4edda";
+
+              // အခြေအနေ (ဂ) - ID 1 ပြည့်နေပြီး၊ Limit က ၂ ခုရမည်ဖြစ်ကာ ID 2 လွတ်နေသေးလျှင် ဒုတိယစက်အဖြစ် မှတ်မည်
+              } else if (!id2 && limit > 1) {
+                await window._supabase.from('profiles').update({ 
+                    registered_device_id_2: currentDeviceId 
+                }).eq('email', geotabUser);
+
+                statusDiv.innerHTML = "✅ ဤစက်ကို ဒုတိယစက်အဖြစ် မှတ်ပုံတင်ပြီးပါပြီ။";
+                statusDiv.style.color = "#155724";
+                statusDiv.style.background = "#d4edda";
+
+              // အခြေအနေ (ဃ) - ခွင့်ပြုထားသော စက်အရေအတွက် ပြည့်သွားပြီး စက်မတူတော့ပါက (Auto Logout လုပ်မည်)
+              } else {
+                statusDiv.innerHTML = `⚠️ ဤအကောင့်သည် ခွင့်ပြုထားသော စက်အရေအတွက် (${limit} ခု) ပြည့်သွားပါပြီ။`;
+                statusDiv.style.color = "#721c24";
+                statusDiv.style.background = "#f8d7da";
+                statusDiv.style.borderColor = "#f5c6cb";
+                
+                alert(`⚠️ လုံခြုံရေးသတိပေးချက်: ဤအကောင့်သည် ခွင့်ပြုထားသော စက်အရေအတွက် ပြည့်သွားပါပြီ။ အခြားစက်မှ ဝင်ရောက်လိုပါက Admin ထံ ဆက်သွယ်ပါ။ သင့်အား စနစ်မှ ထွက်ပါမည်။`);
+                
+                api.forget(); 
+                window.location.reload();
+              }
+            });
+          } catch (e) {
+            console.error("Security Add-in Error:", e);
+          }
+        },
+        blur: function(api, state) {}
+      };
+    };
+  </script>
+</body>
+</html>
