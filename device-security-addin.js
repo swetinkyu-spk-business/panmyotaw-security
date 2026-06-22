@@ -43,7 +43,7 @@ geotab.addin.deviceLock = function(api, state) {
           // ၃။ လုံခြုံရေး စစ်ဆေးခြင်း အဆင့်ဆင့်
           // (က) စက်ဟောင်းဖြစ်နေလျှင် (စစ်ဆေးပြီးသား) ဝင်ခွင့်ပြုမည်
           if (currentDeviceId === id1 || currentDeviceId === id2) {
-            statusDiv.innerHTML = "✅ လုံခြုံရေး အတည်ပြုပြီးပါပြီ။ (Verified Device)";
+            statusDiv.innerHTML = "✅ လုံခြုံရေး အတည်ပြုပြီးပါပြီ။ (Verified Device) ဘယ်ဖက်ထိပ်မှ Map menu အားခေါ်ယူ ပြီး ကားများ၏ တည်နေရာကို ကြည့်ရှုနိုင်ပါပြီ။";
             statusDiv.style.color = "#155724";
             statusDiv.style.background = "#d4edda";
             statusDiv.style.borderColor = "#c3e6cb";
