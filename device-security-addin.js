@@ -49,7 +49,7 @@ geotab.addin.deviceLock = function(api, state) {
             statusDiv.style.borderColor = "#c3e6cb";
 
             // 🌟 (အသစ်) 1.5 စက္ကန့်အကြာတွင် Map သို့ အလိုအလျောက် သွားမည် 🌟
-            setTimeout(() => { window.location.hash = '#map'; }, 2000);
+            // setTimeout(() => { window.location.hash = '#map'; }, 2000);
 
           // (ခ) ပထမစက်နေရာ လွတ်နေသေးလျှင်
           } else if (!id1 && limit >= 1) {
